@@ -4,6 +4,12 @@ const { createUser, getUserByEmail } = require('../models/user');
 
 const registerUserController = async (req, res) => {
   const { firstName, lastName, email, phoneNumber, address, postalCode, city, province, role, profilePicture, password } = req.body;
+  
+  const validRoles = ['admin', 'service'];
+  if (!validRoles.includes(role)) {
+    return res.status(400).send({ message: 'Invalid role. Role must be either "admin" or "service".' });
+  }
+
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
