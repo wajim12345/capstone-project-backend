@@ -8,6 +8,7 @@ require('dotenv').config();
 
 var usersRouter = require('./src/routes/users');
 var authRouter = require('./src/routes/auth')
+var patientRouter = require('./src/routes/patient')
 
 var app = express();
 
@@ -32,6 +33,7 @@ app.use(cors(corsOptions));
 // define the routes
 app.use('/users', usersRouter);
 app.use('/auth', authRouter);
+app.use('/patients', patientRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

@@ -1,4 +1,9 @@
-const { getAllUsers, getUserById, updateUserById, deleteUserById } = require('../models/user');
+const {
+  getAllUsers,
+  getUserById,
+  updateUserById,
+  deleteUserById,
+} = require("../models/userModel");
 
 const getAllUsersController = (req, res) => {
   getAllUsers((err, results) => {
@@ -15,7 +20,7 @@ const getUserByIdController = (req, res) => {
       return res.status(500).send(err);
     }
     if (results.length === 0) {
-      return res.status(404).send('User not found');
+      return res.status(404).send("User not found");
     }
     res.send(results[0]);
   });
@@ -43,5 +48,5 @@ module.exports = {
   getAllUsersController,
   getUserByIdController,
   updateUserByIdController,
-  deleteUserByIdController
+  deleteUserByIdController,
 };
