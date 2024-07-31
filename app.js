@@ -17,6 +17,15 @@ require('./src/configs/db');
 const corsOptions = {
   origin: true
 }
+//Test
+app.get('/test-db-connection', (req, res) => {
+  db.query('SELECT 1 + 1 AS solution', (err, results) => {
+    if (err) {
+      return res.status(500).json({ message: 'Database connection failed', error: err });
+    }
+    res.status(200).json({ message: 'Database connection successful', results });
+  });
+});
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
