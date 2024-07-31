@@ -27,21 +27,32 @@ app.get('/test-db-connection', (req, res) => {
       return res.status(500).json({ message: 'Database connection failed', error: err });
     }
     const dbName = dbResult[0].db_name;
-    
+
     db.query('SHOW TABLES', (err, tableResults) => {
       if (err) {
         console.error('Failed to retrieve tables:', err);
         return res.status(500).json({ message: 'Failed to retrieve tables', error: err });
       }
       const tables = tableResults.map(row => Object.values(row)[0]);
-      res.status(200).json({
-        message: 'Database connection successful',
-        database: dbName,
-        tables: tables
+
+      db.query('SELECT * FROM users WHERE id = 1', (err, userResult) => {
+        if (err) {
+          console.error('Failed to retrieve user:', err);
+          return res.status(500).json({ message: 'Failed to retrieve user', error: err });
+        }
+        const user = userResult[0] || 'No user with id = 1';
+
+        res.status(200).json({
+          message: 'Database connection successful',
+          database: dbName,
+          tables: tables,
+          user: user
+        });
       });
     });
   });
 });
+
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
