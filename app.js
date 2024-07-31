@@ -7,33 +7,34 @@ const cors = require('cors');
 require('dotenv').config();
 
 const db = require('./src/configs/db');
-var usersRouter = require('./src/routes/users');
-var authRouter = require('./src/routes/auth')
-var patientRouter = require('./src/routes/patient')
+const usersRouter = require('./src/routes/users');
+const authRouter = require('./src/routes/auth');
+const patientRouter = require('./src/routes/patient');
+const { authenticateToken } = require('./src/middleware/authMiddleware'); // Ensure this path is correct
 
-var app = express();
-
-require('./src/configs/db');
+const app = express();
 
 const corsOptions = {
   origin: true
-}
-// **Added code for testing database connection**
+};
+
+// **Test database connection without authentication**
 app.get('/test-db-connection', (req, res) => {
+  console.log('Received request for /test-db-connection');
   db.query('SELECT 1 + 1 AS solution', (err, results) => {
     if (err) {
+      console.error('Database connection failed:', err);
       return res.status(500).json({ message: 'Database connection failed', error: err });
     }
+    console.log('Database connection successful:', results);
     res.status(200).json({ message: 'Database connection successful', results });
   });
 });
-// **End of added code**
+// **End of test route code**
 
-// view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
-// use middleware
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -41,23 +42,23 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors(corsOptions));
 
-// define the routes
+// Apply authentication middleware to all routes except /test-db-connection
+app.use(authenticateToken); // Ensure this middleware is applied correctly
+
+// Define the routes
 app.use('/users', usersRouter);
 app.use('/auth', authRouter);
 app.use('/patients', patientRouter);
 
-// catch 404 and forward to error handler
+// Catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
 });
 
-// error handler
+// Error handler
 app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-  // render the error page
   res.status(err.status || 500);
   res.render('error');
 });
