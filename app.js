@@ -18,7 +18,7 @@ const corsOptions = {
   origin: true
 };
 
-// **Test database connection without authentication**
+// **Added code for testing database connection**
 app.get('/test-db-connection', (req, res) => {
   console.log('Received request for /test-db-connection');
   db.query('SELECT 1 + 1 AS solution', (err, results) => {
@@ -42,6 +42,12 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors(corsOptions));
 
+// Log the path and method for every request to debug the 401 issue
+app.use((req, res, next) => {
+  console.log(`Request: ${req.method} ${req.path}`);
+  next();
+});
+
 // Apply authentication middleware to all routes except /test-db-connection
 app.use((req, res, next) => {
   if (req.path === '/test-db-connection') {
@@ -64,6 +70,7 @@ app.use(function(req, res, next) {
 app.use(function(err, req, res, next) {
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
+
   res.status(err.status || 500);
   res.render('error');
 });
