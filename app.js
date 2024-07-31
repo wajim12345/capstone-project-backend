@@ -21,13 +21,25 @@ const corsOptions = {
 // Test database connection without authentication
 app.get('/test-db-connection', (req, res) => {
   console.log('Received request for /test-db-connection');
-  db.query('SELECT 1 + 1 AS solution', (err, results) => {
+  db.query('SELECT DATABASE() AS db_name', (err, dbResult) => {
     if (err) {
       console.error('Database connection failed:', err);
       return res.status(500).json({ message: 'Database connection failed', error: err });
     }
-    console.log('Database connection successful:', results);
-    res.status(200).json({ message: 'Database connection successful', results });
+    const dbName = dbResult[0].db_name;
+    
+    db.query('SHOW TABLES', (err, tableResults) => {
+      if (err) {
+        console.error('Failed to retrieve tables:', err);
+        return res.status(500).json({ message: 'Failed to retrieve tables', error: err });
+      }
+      const tables = tableResults.map(row => Object.values(row)[0]);
+      res.status(200).json({
+        message: 'Database connection successful',
+        database: dbName,
+        tables: tables
+      });
+    });
   });
 });
 
