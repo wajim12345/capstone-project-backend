@@ -43,7 +43,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors(corsOptions));
 
 // Apply authentication middleware to all routes except /test-db-connection
-app.use(authenticateToken); // Ensure this middleware is applied correctly
+app.use((req, res, next) => {
+  if (req.path === '/test-db-connection') {
+    return next();
+  }
+  authenticateToken(req, res, next);
+});
 
 // Define the routes
 app.use('/users', usersRouter);
