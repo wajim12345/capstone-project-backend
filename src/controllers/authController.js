@@ -149,7 +149,8 @@ const requestPasswordReset = async (req, res) => {
       )
     );
 
-    const resetUrl = `http://${req.headers.host}/auth/reset/${resetPasswordToken}`;
+    const resetUrl = `http://localhost:3000/auth/reset/${resetPasswordToken}`;
+                    //`http://${req.headers.host}/auth/reset/${resetPasswordToken}`;
 
     await sendEmail(
       user.email,
