@@ -146,7 +146,7 @@ const requestPasswordReset = async (req, res) => {
 
     const resetPasswordUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetPasswordToken}`;
 
-    res.status(200).json({ resetPasswordUrl });
+    res.status(200).json({ resetPasswordToken });
   } catch (err) {
     console.error("Error during password reset request:", err);
     if (!res.headersSent) {
