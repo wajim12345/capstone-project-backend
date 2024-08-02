@@ -64,17 +64,21 @@ const loginUserController = (req, res) => {
 
   getUserByEmail(email, async (err, results) => {
     if (err) {
+      console.error('Database error:', err);
       return res.status(500).send("Internal Server Error");
     }
 
     if (results.length === 0) {
+      console.log('No user found with email:', email);
       return res.status(401).send("Invalid email or password");
     }
 
     const user = results[0];
+    console.log('User found:', user);
 
     try {
       const passwordMatch = await bcrypt.compare(password, user.password);
+      console.log('Password match:', passwordMatch);
       if (passwordMatch) {
         const token = jwt.sign(
           { id: user.id, email: user.email, role: user.role },
@@ -90,15 +94,16 @@ const loginUserController = (req, res) => {
           user: userWithoutPassword,
         });
       } else {
+        console.log('Password does not match');
         res.status(401).send("Invalid email or password");
       }
     } catch (error) {
-      res
-        .status(500)
-        .send("Error during password comparison or token generation:", error);
+      console.error('Error during password comparison or token generation:', error);
+      res.status(500).send("Error during password comparison or token generation:", error);
     }
   });
 };
+
 
 const requestPasswordReset = async (req, res) => {
   const { email } = req.body;
@@ -144,7 +149,10 @@ const requestPasswordReset = async (req, res) => {
       )
     );
 
+
     const resetPasswordUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetPasswordToken}`;
+
+
 
     res.status(200).json({ resetPasswordToken });
   } catch (err) {
