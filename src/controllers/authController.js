@@ -109,6 +109,10 @@ const requestPasswordReset = async (req, res) => {
   const { email } = req.body;
 
   try {
+    // Log email for which password reset is requested
+    console.log(`Password reset requested for email: ${email}`);
+
+    // Check if the user exists by email
     const results = await new Promise((resolve, reject) =>
       getUserByEmail(email, (err, results) => {
         if (err) {
@@ -120,6 +124,9 @@ const requestPasswordReset = async (req, res) => {
       })
     );
 
+    // Log results from getUserByEmail
+    console.log(`Results from getUserByEmail: ${JSON.stringify(results)}`);
+
     if (results.length === 0) {
       return res.status(404).json({ error: "No user found with that email" });
     }
@@ -130,17 +137,26 @@ const requestPasswordReset = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
+
+    // Log generated token
+    console.log(`Generated resetPasswordToken: ${resetPasswordToken}`);
+
     const resetPasswordExpires = new Date(Date.now() + 3600000)
       .toISOString()
       .slice(0, 19)
       .replace("T", " ");
 
+    // Log reset password expiration
+    console.log(`resetPasswordExpires: ${resetPasswordExpires}`);
+
+    // Update user with reset token and expiration
     await new Promise((resolve, reject) =>
       updateUserByEmail(
         email,
         { resetPasswordToken, resetPasswordExpires },
         (err, results) => {
           if (err) {
+            console.error("Error updating user by email:", err);
             reject(err);
           } else {
             resolve(results);
@@ -149,8 +165,15 @@ const requestPasswordReset = async (req, res) => {
       )
     );
 
+    // Log success of update
+    console.log(`User updated with reset token and expiration`);
 
     const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetPasswordToken}`;
+
+    // Log reset URL
+    console.log(`Reset URL: ${resetUrl}`);
+
+    // Send email
     await sendEmail(
       user.email,
       "Password Reset",
@@ -159,6 +182,9 @@ const requestPasswordReset = async (req, res) => {
       ${resetUrl}\n\n
       If you did not request this, please ignore this email and your password will remain unchanged.\n`
     );
+
+    // Log success of email sending
+    console.log(`Password reset email sent to: ${user.email}`);
 
     res.status(200).json({
       resetPasswordToken,
@@ -169,6 +195,7 @@ const requestPasswordReset = async (req, res) => {
     res.status(500).json({ error: "An error occurred during the password reset request" });
   }
 };
+
 
 const resetPassword = async (req, res) => {
   const { resetToken } = req.params;
