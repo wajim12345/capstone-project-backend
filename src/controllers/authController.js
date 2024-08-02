@@ -100,6 +100,7 @@ const loginUserController = (req, res) => {
   });
 };
 
+
 const requestPasswordReset = async (req, res) => {
   const { email } = req.body;
 
@@ -144,14 +145,24 @@ const requestPasswordReset = async (req, res) => {
       )
     );
 
-    const resetPasswordUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetPasswordToken}`;
+    const resetUrl = `http://${req.headers.host}/auth/reset/${resetPasswordToken}`;
 
-    res.status(200).json({ resetPasswordToken });
-  } catch (err) {
-    console.error("Error during password reset request:", err);
-    if (!res.headersSent) {
-      res.status(500).json({ error: "An error occurred during the password reset request" });
-    }
+    await sendEmail(
+      user.email,
+      "Password Reset",
+      `You are receiving this because you (or someone else) have requested to reset the password for your account.\n\n
+      Please click on the following link, or paste this into your browser to complete the process:\n\n
+      ${resetUrl}\n\n
+      If you did not request this, please ignore this email and your password will remain unchanged.\n`
+    );
+
+    res.status(200).json({
+      resetPasswordToken,
+      message: "A reset password link has been sent to your email address",
+    });
+  } catch (error) {
+    console.error("Error during password reset request:", error);
+    res.status(500).json({ error: "An error occurred during the password reset request" });
   }
 };
 
