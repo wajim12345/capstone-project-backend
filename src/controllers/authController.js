@@ -168,7 +168,7 @@ const requestPasswordReset = async (req, res) => {
     // Log success of update
     console.log(`User updated with reset token and expiration`);
 
-    const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetPasswordToken}`;
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password-step2?token=${resetPasswordToken}`;
 
     // Log reset URL
     console.log(`Reset URL: ${resetUrl}`);
