@@ -15,6 +15,7 @@ const createUser = (user, callback) => {
     user.province,
     user.role,
     user.profilePicture,
+    // user.position
   ];
 
   connection.query(query, values, callback);
@@ -40,7 +41,7 @@ const getUserById = (id, callback) => {
 
 const updateUserById = (id, user, callback) => {
   const query =
-    "UPDATE users SET firstName = ?, lastName = ?, email = ?, phoneNumber = ?, address = ?, postalCode = ?, city = ?, province = ?, role = ?, profilePicture = ? WHERE id = ?";
+    "UPDATE users SET firstName = ?, lastName = ?, email = ?, phoneNumber = ?, address = ?, postalCode = ?, city = ?, province = ?, role = ?, profilePicture = ?, position = ? WHERE id = ?";
   const values = [
     user.firstName,
     user.lastName,
@@ -52,6 +53,7 @@ const updateUserById = (id, user, callback) => {
     user.province,
     user.role,
     user.profilePicture,
+    user.position,
     id,
   ];
 

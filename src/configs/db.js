@@ -33,7 +33,9 @@ connection.connect((err) => {
     role VARCHAR(50) NOT NULL,
     profilePicture VARCHAR(255),
     resetPasswordToken VARCHAR(255),
-    resetPasswordExpires DATETIME
+    resetPasswordExpires DATETIME,
+    captchaCode VARCHAR(6)
+
   );
   `;
 

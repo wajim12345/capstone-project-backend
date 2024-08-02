@@ -8,7 +8,7 @@ const {
 } = require("../controllers/authController");
 
 // Reset password
-router.post("/reset/:resetToken", resetPassword);
+router.post("/reset", resetPassword);
 
 // Request password reset
 router.post("/forgot", requestPasswordReset);
