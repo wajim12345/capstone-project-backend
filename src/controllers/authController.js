@@ -157,6 +157,7 @@ const requestPasswordReset = async (req, res) => {
 
     res
       .status(200)
+      .send({ resetUrl})
       .send("A reset password link has been sent to your email address");
   } catch (error) {
     res.status(500).send(error);
