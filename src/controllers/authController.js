@@ -21,7 +21,7 @@
 //     role,
 //     profilePicture,
 //     password,
-    
+
 //   } = req.body;
 
 //   const validRoles = ["admin", "service"];
@@ -100,7 +100,6 @@
 //     }
 //   });
 // };
-
 
 // const requestPasswordReset = async (req, res) => {
 //   const { email } = req.body;
@@ -226,7 +225,6 @@
 //   resetPassword,
 // };
 
-
 const crypto = require("crypto");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -237,112 +235,75 @@ const {
   updateUserByEmail,
 } = require("../models/userModel");
 
-const registerUserController = async (req, res) => {
-  const {
-    firstName,
-    lastName,
-    email,
-    phoneNumber,
-    address,
-    postalCode,
-    city,
-    province,
-    role,
-    profilePicture,
-    password,
-    
-  } = req.body;
+const registerUserController = (req, res) => {
+  const user = { ...req.body };
 
-  const validRoles = ["admin", "service"];
-  if (!validRoles.includes(role)) {
-    return res
-      .status(400)
-      .send({
-        message: 'Invalid role. Role must be either "admin" or "service".',
-      });
-  }
+  createUser(user, (err, results) => {
+    if (err) {
+      console.error("Error during user registration:", err);
+      return res
+        .status(400)
+        .send({ error: "Failed to register user", details: err });
+    }
 
-  try {
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = {
-      firstName,
-      lastName,
-      email,
-      phoneNumber,
-      address,
-      postalCode,
-      city,
-      province,
-      role,
-      profilePicture,
-      password: hashedPassword,
-    };
-
-    createUser(user, (err, results) => {
-      if (err) {
-        return res.status(400).send(err);
-      }
-      res.status(201).send(results);
-    });
-  } catch (error) {
-    res.status(500).send(error);
-  }
+    console.log("User registered successfully:", results);
+    res
+      .status(201)
+      .send({ message: "User created successfully", userId: results.insertId });
+  });
 };
+
+// const loginUserController = (req, res) => {
 
 const loginUserController = (req, res) => {
   const { email, password } = req.body;
 
   getUserByEmail(email, async (err, results) => {
     if (err) {
-      console.error('Database error:', err);
       return res.status(500).send("Internal Server Error");
     }
 
     if (results.length === 0) {
-      console.log('No user found with email:', email);
       return res.status(401).send("Invalid email or password");
     }
 
     const user = results[0];
-    console.log('User found:', user);
 
     try {
       const passwordMatch = await bcrypt.compare(password, user.password);
-      console.log('Password match:', passwordMatch);
+
       if (passwordMatch) {
         const token = jwt.sign(
-          { id: user.id, email: user.email, role: user.role },
+          { id: user.userId, email: user.email, isAdmin: user.isAdmin },
           process.env.JWT_SECRET,
-          { expiresIn: "1d" }
+          { expiresIn: "1h" }
         );
 
         // Exclude the password from the user object
         const { password, ...userWithoutPassword } = user;
 
-        res.json({
+        return res.json({
           token,
           user: userWithoutPassword,
         });
       } else {
-        console.log('Password does not match');
-        res.status(401).send("Invalid email or password");
+        console.log("Password mismatch for user:", email);
+        return res.status(401).send("Invalid email or password");
       }
     } catch (error) {
-      console.error('Error during password comparison or token generation:', error);
-      res.status(500).send("Error during password comparison or token generation:", error);
+      console.log(
+        "Error during password comparison or token generation:",
+        error
+      );
+      return res.status(500).send("Internal Server Error");
     }
   });
 };
-
 
 const requestPasswordReset = async (req, res) => {
   const { email } = req.body;
 
   try {
-    // Log email for which password reset is requested
-    console.log(`Password reset requested for email: ${email}`);
-
-    // Check if the user exists by email
     const results = await new Promise((resolve, reject) =>
       getUserByEmail(email, (err, results) => {
         if (err) {
@@ -354,31 +315,23 @@ const requestPasswordReset = async (req, res) => {
       })
     );
 
-    // Log results from getUserByEmail
-    console.log(`Results from getUserByEmail: ${JSON.stringify(results)}`);
-
     if (results.length === 0) {
       return res.status(404).json({ error: "No user found with that email" });
     }
 
     const user = results[0];
-    const captchaCode = Math.floor(100000 + Math.random() * 900000).toString(); // Generate 6-digit CAPTCHA code
+    const captchaCode = Math.floor(100000 + Math.random() * 900000).toString();
     const resetPasswordExpires = new Date(Date.now() + 3600000)
       .toISOString()
       .slice(0, 19)
       .replace("T", " ");
 
-    // Log reset password expiration
-    console.log(`resetPasswordExpires: ${resetPasswordExpires}`);
-
-    // Update user with reset token and expiration
     await new Promise((resolve, reject) =>
       updateUserByEmail(
         email,
         { captchaCode, resetPasswordExpires },
         (err, results) => {
           if (err) {
-            console.error("Error updating user by email:", err);
             reject(err);
           } else {
             resolve(results);
@@ -396,20 +349,17 @@ const requestPasswordReset = async (req, res) => {
       If you did not request this, please ignore this email and your password will remain unchanged.\n`
     );
 
-    // Log success of email sending
-    console.log(`Password reset email sent to: ${user.email}`);
-
     res.status(200).json({
       message: "A CAPTCHA code has been sent to your email address",
       captchaCode,
-      email
+      email,
     });
   } catch (error) {
-    console.error("Error during password reset request:", error);
-    res.status(500).json({ error: "An error occurred during the password reset request" });
+    res
+      .status(500)
+      .json({ error: "An error occurred during the password reset request" });
   }
 };
-
 
 const resetPassword = async (req, res) => {
   const { email, newPassword, captchaCode } = req.body;
@@ -462,7 +412,6 @@ const resetPassword = async (req, res) => {
     res.status(500).send(error);
   }
 };
-
 
 module.exports = {
   registerUserController,

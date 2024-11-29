@@ -1,5 +1,6 @@
 const express = require("express");
 const {
+  getAllPatientsController,
   createPatientController,
   getPatientController,
   updatePatientController,
@@ -12,10 +13,13 @@ const {
 
 const router = express.Router();
 
+// Only admins can view all patients
+router.get("/", authenticateToken, authorizeAdmin, getAllPatientsController);
+
 // Only admins can create patients
 router.post("/", authenticateToken, authorizeAdmin, createPatientController);
 
-// All users can view patients
+// Users that are team member can view a patient by id
 router.get("/:clientId", authenticateToken, getPatientController);
 
 // Only admins can update patients

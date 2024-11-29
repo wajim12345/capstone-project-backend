@@ -1,7 +1,37 @@
+# DB_HOST=
+# DB_USER=
+# DB_PASSWORD=
+# DB_NAME=
+ 
+# EMAIL_SERVICE=
+# EMAIL_USER=
+# EMAIL_PASS=
+# EMAIL_FROM=
+ 
+# JWT_SECRET=
+
+# GOOGLE_PROJECT_ID=
+# GOOGLE_PRIVATE_KEY_ID=
+# GOOGLE_PRIVATE_KEY=
+# GOOGLE_CLIENT_EMAIL=
+# GOOGLE_CLIENT_ID=
+# GOOGLE_AUTH_URI=
+# GOOGLE_TOKEN_URI=F
+# GOOGLE_AUTH_PROVIDER_CERT_URL=
+# GOOGLE_CLIENT_CERT_URL=
+
+# node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
+
+
 # Node.js
 node_modules/
 npm-debug.log
 yarn-error.log
+
+tests/
+
+# certs
+certs/
 
 # Logs
 logs

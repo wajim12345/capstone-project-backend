@@ -1,43 +1,36 @@
 const connection = require("../configs/db");
 
+const getAllPatients = (callback) => {
+  const query = "SELECT * FROM ExistingClient";
+  connection.query(query, callback);
+};
+
 const createPatient = (patient, callback) => {
   const query = `
   INSERT INTO ExistingClient (
-    aType, teamMemberList, guardianList, consentList, insurance, invoice, psNote,
-    firstName, lastName, gender, birthDate, address, postalCode, phone, email,
-    diagnosis, school, age, currentStatus, fscdIdNum, contractId, guardianId,
-    insuranceInfoId, invoiceId, consentId, scheduleId, teamMemberId, outsideProviderId
-  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    psNote, firstName, lastName, gender, birthDate, address, city, province, postalCode, phoneNumber, email,
+    school, age, currentStatus, fscdIdNum, grade, serviceStartDate, serviceEndDate
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `;
   const values = [
-    patient.aType,
-    patient.teamMemberList,
-    patient.guardianList,
-    patient.consentList,
-    patient.insurance,
-    patient.invoice,
-    patient.psNote,
-    patient.firstName,
-    patient.lastName,
-    patient.gender,
-    patient.birthDate,
-    patient.address,
-    patient.postalCode,
-    patient.phone,
-    patient.email,
-    patient.diagnosis,
-    patient.school,
-    patient.age,
-    patient.currentStatus,
-    patient.fscdIdNum,
-    patient.contractId,
-    patient.guardianId,
-    patient.insuranceInfoId,
-    patient.invoiceId,
-    patient.consentId,
-    patient.scheduleId,
-    patient.teamMemberId,
-    patient.outsideProviderId,
+    patient.psNote, 
+    patient.firstName, 
+    patient.lastName, 
+    patient.gender, 
+    patient.birthDate, 
+    patient.address, 
+    patient.city, 
+    patient.province, 
+    patient.postalCode, 
+    patient.phoneNumber, 
+    patient.email, 
+    patient.school, 
+    patient.age, 
+    patient.currentStatus, 
+    patient.fscdIdNum, 
+    patient.grade,
+    patient.serviceStartDate,
+    patient.serviceEndDate
   ];
   connection.query(query, values, (err, results) => {
     if (err) {
@@ -58,53 +51,48 @@ const createPatient = (patient, callback) => {
   });
 };
 
-const getPatientById = (clientId, callback) => {
-  const query = "SELECT * FROM ExistingClient WHERE clientId = ?";
-  connection.query(query, [clientId], callback);
+const getPatientById = (clientId) => {
+  return new Promise((resolve, reject) => {
+    const query = `
+      SELECT * FROM ExistingClient WHERE clientId = ?
+    `;
+    connection.query(query, [clientId], (err, results) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve(results);
+    });
+  });
 };
 
-const updatePatientById = (clientId, patient, callback) => {
-  const query = `
-    UPDATE ExistingClient SET
-      aType = ?, teamMemberList = ?, guardianList = ?, consentList = ?, insurance = ?, invoice = ?, psNote = ?,
-      firstName = ?, lastName = ?, gender = ?, birthDate = ?, address = ?, postalCode = ?, phone = ?, email = ?,
-      diagnosis = ?, school = ?, age = ?, currentStatus = ?, fscdIdNum = ?, contractId = ?, guardianId = ?,
-      insuranceInfoId = ?, invoiceId = ?, consentId = ?, scheduleId = ?, teamMemberId = ?, outsideProviderId = ?
-    WHERE clientId = ?
-  `;
-  const values = [
-    patient.aType,
-    patient.teamMemberList,
-    patient.guardianList,
-    patient.consentList,
-    patient.insurance,
-    patient.invoice,
-    patient.psNote,
-    patient.firstName,
-    patient.lastName,
-    patient.gender,
-    patient.birthDate,
-    patient.address,
-    patient.postalCode,
-    patient.phone,
-    patient.email,
-    patient.diagnosis,
-    patient.school,
-    patient.age,
-    patient.currentStatus,
-    patient.fscdIdNum,
-    patient.contractId,
-    patient.guardianId,
-    patient.insuranceInfoId,
-    patient.invoiceId,
-    patient.consentId,
-    patient.scheduleId,
-    patient.teamMemberId,
-    patient.outsideProviderId,
-    clientId,
-  ];
-  connection.query(query, values, callback);
+const updatePatientById = (clientId, patient) => {
+  return new Promise((resolve, reject) => {
+    // Initialize an array to hold the field assignments
+    const fields = [];
+    const values = [];
+
+    // Iterate over the patient object to dynamically create the query
+    Object.keys(patient).forEach((key) => {
+      if (patient[key] !== undefined) {
+        fields.push(`${key} = ?`);
+        values.push(patient[key]);
+      }
+    });
+
+    // Join the fields array with commas to form the SET clause
+    const query = `UPDATE ExistingClient SET ${fields.join(', ')} WHERE clientId = ?`;
+    values.push(clientId); // Add clientId to the values array
+
+    // Execute the query and handle the promise resolve/reject
+    connection.query(query, values, (err, results) => {
+      if (err) {
+        return reject(err); // reject the promise with the error
+      }
+      resolve(results); // resolve the promise with the results
+    });
+  });
 };
+
 
 const deletePatientById = (clientId, callback) => {
   const query = "DELETE FROM ExistingClient WHERE clientId = ?";
@@ -112,6 +100,7 @@ const deletePatientById = (clientId, callback) => {
 };
 
 module.exports = {
+  getAllPatients,
   createPatient,
   getPatientById,
   updatePatientById,

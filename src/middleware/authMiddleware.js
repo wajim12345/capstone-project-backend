@@ -24,7 +24,8 @@ const authenticateToken = (req, res, next) => {
 
 // verify if the user is admin
 const authorizeAdmin = (req, res, next) => {
-  if (!req.user || req.user.role !== "admin") {
+  console.log("Checking admin status for user:", req.user); 
+  if (!req.user || req.user.isAdmin !== 1) {
     return res.sendStatus(403);
   }
   next();

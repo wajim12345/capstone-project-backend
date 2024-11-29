@@ -6,6 +6,7 @@ const {
   requestPasswordReset,
   resetPassword,
 } = require("../controllers/authController");
+const { authenticateToken, authorizeAdmin } = require("../middleware/authMiddleware");
 
 // Reset password
 router.post("/reset", resetPassword);
@@ -14,6 +15,7 @@ router.post("/reset", resetPassword);
 router.post("/forgot", requestPasswordReset);
 
 // Registration endpoint
+// router.post("/register", authenticateToken, authorizeAdmin, registerUserController);
 router.post("/register", registerUserController);
 
 // Login endpoint
